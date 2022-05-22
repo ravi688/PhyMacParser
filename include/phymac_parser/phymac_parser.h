@@ -31,4 +31,4 @@ typedef struct pmc_parser_callbacks_t
 
 } pmc_parser_callbacks_t;
 
-PMC_PARSER_API void pmc_parse(pmc_parser_callbacks_t* callbacks, const char* string, u32 length);
+PMC_PARSER_API void pmc_parse(pmc_parser_callbacks_t* callbacks, char* string, u32 length);

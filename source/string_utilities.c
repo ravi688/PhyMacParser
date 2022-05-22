@@ -39,9 +39,8 @@ PMC_PARSER_API bool is_empty(const char* start, const char* const end)
 	return empty;
 }
 
-PMC_PARSER_API void remove_comments(char* start, u64 length)
+PMC_PARSER_API void remove_comments(char* start, const char* const end)
 {
-	const char* const end = start + length;
 	bool single_line_comment_begin = false; 
 	bool multiple_line_comment_begin = false;
 

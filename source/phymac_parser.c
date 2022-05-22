@@ -4,14 +4,14 @@
 
 static const char* parse(const char* str, u32 length, pmc_parser_callbacks_t* callbacks, u32 categoryRank);
 
-void pmc_parse(pmc_parser_callbacks_t* callbacks, const char* string, u32 length)
+void pmc_parse(pmc_parser_callbacks_t* callbacks, char* string, u32 length)
 {
+	remove_comments(string, string + length);
 	parse(string, length, callbacks, 0);
 }
 
 static const char* parse(const char* str, u32 length, pmc_parser_callbacks_t* callbacks, u32 categoryRank)
 {
-
 	const char* origin = str;
 	const char* const end = origin + length;
 	str = skip_whitespaces(str, end);
