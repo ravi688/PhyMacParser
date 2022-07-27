@@ -1,2 +1,2 @@
-# TemplateRepository
-This repository contains template for a project in C language
+# PhyMac Parser 
+Parsing library for all my custom markup language, shader language, and config files.
