@@ -51,14 +51,14 @@ typedef int64_t s64;
 #define HOT HOT_FUNCTION
 #define COLD COLD_FUNCTION
 
-#ifdef TEMPLATE_REPO_STATIC_LIBRARY
-#	define TEMPLATE_REPO_API
-#elif TEMPLATE_REPO_DYNAMIC_LIBRARY
-#	define TEMPLATE_REPO_API __declspec(dllimport)
+#ifdef PPSR_STATIC_LIBRARY
+#	define PPSR_API
+#elif PPSR_DYNAMIC_LIBRARY
+#	define PPSR_API __declspec(dllimport)
 #elif BUILD_DYNAMIC_LIBRARY
-#	define TEMPLATE_REPO_API __declspec(dllexport)
+#	define PPSR_API __declspec(dllexport)
 #else
-#	define TEMPLATE_REPO_API
+#	define PPSR_API
 #endif
 
 #ifdef __cplusplus
