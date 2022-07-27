@@ -1,0 +1,3 @@
+[submodule "dependencies/DiskManager"]
+	path = dependencies/DiskManager
+	url = https://github.com/ravi688/DiskManager.git
