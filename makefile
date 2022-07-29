@@ -18,8 +18,8 @@ EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBS = 
 
-DEPENDENCIES = DiskManager
-DEPENDENCY_LIBS = DiskManager/lib/diskmanager.a DiskManager/shared-dependencies/CallTrace/lib/calltrace.a
+DEPENDENCIES = ../../MeshLib/dependencies/DiskManager
+DEPENDENCY_LIBS = ../../MeshLib/dependencies/DiskManager/lib/diskmanager.a ../../SafeMemory/shared-dependencies/CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = 
 SHARED_DEPENDENCY_LIBS = 
@@ -230,8 +230,8 @@ bin-clean:
 	$(RM) $(TARGET_DYNAMIC_IMPORT_LIB)
 	$(RM_DIR) $(TARGET_LIB_DIR)
 	@echo [Log] Binaries cleaned successfully!
-	$(MAKE) --directory=./dependencies/DiskManager clean
-# 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
+	$(MAKE) --directory=./dependencies/../../MeshLib/dependencies/DiskManager clean
+	$(MAKE) --directory=./../SafeMemory/shared-dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/HPML clean
 #  	$(MAKE) --directory=./dependencies/tgc clean
