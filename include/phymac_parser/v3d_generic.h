@@ -15,6 +15,7 @@ static FORCE_INLINE u32 U32_PAIR_DIFF(u32_pair_t pair) { return pair.end - pair.
 
 typedef enum v3d_generic_node_type_t
 {
+	V3D_GENERIC_NODE_TYPE_INVALID,
 	V3D_GENERIC_NODE_TYPE_FIELD,
 	V3D_GENERIC_NODE_TYPE_BLOCK
 } v3d_generic_node_type_t;

@@ -1,17 +1,10 @@
-[Name("GroundShader")]
+[Name(GroundShader)]
 Shader
 {
-    // Descriptor Sets
     Properties
     {
-        // Internal & Built-in sets are as follows:
-        // GLOBAL_SET
-        // RENDER_SET
-        // SUB_RENDER_SET
-        // OBJECT_SET
-
         [location(MATERIAL_SET, TEXTURE_BINDING0)]
-        fragment uniform sampler2D normalMap;
+        fragment uniform sampler2D normalMap = "white";
 
         [location(MATERIAL_SET, TEXTURE_BINDING1)]
         fragment uniform sampler2D normalMap2;
@@ -37,7 +30,6 @@ Shader
         } parameters;
     }
 
-    // Vertex Attribute Descriptions
     VertexBufferLayout
     {
         [location(0, POSITION_LOCATION)]
@@ -67,17 +59,14 @@ Shader
         {
             GraphicsPipeline
             {
-                // no color attachments
                 colorBlend { } 
                 depthStencil
                 {
-                    // enabling test or write attaches a depth buffer to this render pass
                     depthTestEnable = true
                     depthWriteEnable = true
                 }
             }
 
-            // GLSL code
             [NoParse]
             glsl
             {
@@ -106,12 +95,10 @@ Shader
         {
             GraphicsPipeline
             {
-                // one color attachment
                 colorBlend
                 {
                     attachment { }
                 }
-                // one depth attachment
                 depthStencil
                 {
                     depthTestEnable = true
@@ -246,3 +233,5 @@ Shader
         }
     }
 }
+
+
