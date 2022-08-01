@@ -25,6 +25,15 @@ static v3d_generic_node_t* node_create()
 	return node;
 }
 
+static const char* get_token(const char* str, const char* delimiters, const char* const start, const char* const end, u32_pair_t OUT pair)
+{
+	u32_pair_t value = { str - start, skip_until(str, delimiters, end) - start };
+	str = skip_ws(str + U32_PAIR_DIFF(value), end);	
+	pair->start = value.start;
+	pair->end = value.end;
+	return str;
+}
+
 static const char* parse_attributes(const char* str, const char* const start, const char* const end, bool OUT is_parse)
 {
 	while(*str == '[')
@@ -41,9 +50,10 @@ static const char* parse_attributes(const char* str, const char* const start, co
 			while(*str != ')')
 			{
 				str = skip_ws(str, end);
-				u32_pair_t para_name = { str - start, skip_until(str, ",=)]\t\n ", end) - start };
-				debug_log_info("Parameter: %.*s", para_name.end - para_name.start, str);
-				str = skip_ws(str + U32_PAIR_DIFF(para_name), end);
+				u32_pair_t pair;
+				const char* _str = get_token(str, ",=)]\t\n ", start, end, &pair);
+				debug_log_info("Parameter: %.*s", pair.end - pair.start, str);
+				str = _str;
 L1:
 				switch(*str)
 				{
@@ -54,9 +64,9 @@ L1:
 						continue;
 					case '=':
 						str = skip_ws(str + 1, end);
-						u32_pair_t arg_name = { str - start, skip_until(str, ",)]\t\n ", end) - start };
-						debug_log_info("Value: %.*s", U32_PAIR_DIFF(arg_name), str);
-						str = skip_ws(str + U32_PAIR_DIFF(arg_name), end);
+						_str = get_token(str, ",)]\t\n ", start, end, &pair);
+						debug_log_info("Value: %.*s", U32_PAIR_DIFF(pair), str);
+						str = _str;
 						goto L1;
 					default:
 						expected("\",\" \"=\" or \")\"", str, end);
@@ -78,13 +88,17 @@ static const char* parse(const char* str, const char* const start, const char* c
 	bool is_parse = true;
 	str = parse_attributes(str, start, end, &is_parse);
 	
-	while((*str != '{') && (*str != ';') && (*str != ',') && (*str != '}'))
+	char buffer[2] = { *str, 0 };
+	while(strpbrk("{};,=[", buffer) == NULL)
 	{
-		u32_pair_t name = { str - start, skip_until(str, ",{;\t\n ", end) - start };
-		debug_log_info("token: %.*s", U32_PAIR_DIFF(name), str);
-		str = skip_ws(str + U32_PAIR_DIFF(name), end);
+		u32_pair_t pair;
+		const char* _str = get_token(str, ",{;\t\n ", start, end, &pair);
+		debug_log_info("token: %.*s", U32_PAIR_DIFF(pair), str);
+		str = _str;
+		buffer[0] = *str;
 	}
 
+L2:
 	switch(*str)
 	{
 		case '{':
@@ -118,6 +132,24 @@ static const char* parse(const char* str, const char* const start, const char* c
 			return str + 1;
 		case '}':
 			return str;
+		case '[':
+			str = skip_ws(str + 1, end);
+			while(*str != ']')
+			{
+				u32_pair_t pair;
+				const char* _str = get_token(str, "]\t\n ", start, end, &pair);
+				debug_log_info("Indexer: %.*s", U32_PAIR_DIFF(pair), str);
+				str = _str;
+			}
+			str = skip_ws(str + 1, end);
+			goto L2;
+		case '=':
+			str = skip_ws(str + 1, end);
+			u32_pair_t pair;
+			const char* _str = get_token(str, ",;\t\n ", start, end, &pair);
+			debug_log_info("Value: %.*s", U32_PAIR_DIFF(pair), str);
+			str = _str;
+			goto L2;
 	}
 	return str;
 }

@@ -13,7 +13,7 @@ Shader
         fragment uniform sampler2D specularMap;
         
         [location(MATERIAL_SET, TEXTURE_BINDING3)]
-        fragment uniform sampler2D heightMap;
+        fragment uniform sampler2D heightMap [ 100 100 ] [200];
 
         [location(MATERIAL_SET, MATERIAL_PROPERTIES_BINDING)]
         fragment vertex uniform
@@ -25,7 +25,7 @@ Shader
             {
                 float transmittance;
                 float color;
-            } pbrValues;
+            } pbrValues [2] [100];
 
         } parameters;
     }
