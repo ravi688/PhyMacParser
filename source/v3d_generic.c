@@ -4,6 +4,7 @@
 #include <phymac_parser/string.h> // for custom string functions
 #include <string.h>		// for memory and string functions
 #include <stdlib.h> 	// for malloc
+#include <BufferLib/buffer.h>
 
 
 static const char* check(const char* str, const char* const end)
@@ -34,16 +35,26 @@ static const char* get_token(const char* str, const char* delimiters, const char
 	return str;
 }
 
-static const char* parse_attributes(const char* str, const char* const start, const char* const end, bool OUT is_parse)
+typedef struct attrib_str_pair_t
 {
+	v3d_generic_attribute_t* attributes;
+	u32 attribute_count;
+	const char* str;
+} attrib_str_pair_t;
+
+static attrib_str_pair_t parse_attributes(const char* str, const char* const start, const char* const end, bool OUT is_parse)
+{
+	BUFFER attributes = buf_new(v3d_generic_attribute_t);
 	while(*str == '[')
 	{
 		str = skip_ws(str + 1, end);
-		u32_pair_t name = { str - start, skip_until(str, "(]\t\n ", end) - start };
-		debug_log_info("Attribute Name: %.*s", U32_PAIR_DIFF(name), str);
-		if(strncmp("NoParse", str, U32_PAIR_DIFF(name)) == 0)
+		v3d_generic_attribute_t attribute;
+		const char* _str = get_token(str, "(]\t\n ", start, end, &attribute.name);
+		if(strncmp("NoParse", str, U32_PAIR_DIFF(attribute.name)) == 0)
 			*is_parse = false;
-		str = skip_ws(str + U32_PAIR_DIFF(name), end);
+		str = _str;
+		BUFFER parameters = buf_new(u32_pair_t);
+		BUFFER arguments = buf_new(u32_pair_t);
 		if(*str == '(')
 		{
 			str++;
@@ -51,22 +62,21 @@ static const char* parse_attributes(const char* str, const char* const start, co
 			{
 				str = skip_ws(str, end);
 				u32_pair_t pair;
-				const char* _str = get_token(str, ",=)]\t\n ", start, end, &pair);
-				debug_log_info("Parameter: %.*s", pair.end - pair.start, str);
-				str = _str;
+				str = get_token(str, ",=)]\t\n ", start, end, &pair);
 L1:
 				switch(*str)
 				{
 					case ',':
 						str = check(str + 1, end);
-						continue;
 					case ')':
+						buf_push(&arguments, &pair);
+						buf_push_pseudo(&parameters, 1);
 						continue;
 					case '=':
+						buf_push(&parameters, &pair);
 						str = skip_ws(str + 1, end);
-						_str = get_token(str, ",)]\t\n ", start, end, &pair);
-						debug_log_info("Value: %.*s", U32_PAIR_DIFF(pair), str);
-						str = _str;
+						str = get_token(str, ",)]\t\n ", start, end, &pair);
+						buf_push(&arguments, &pair);
 						goto L1;
 					default:
 						expected("\",\" \"=\" or \")\"", str, end);
@@ -77,26 +87,44 @@ L1:
 		if(*str != ']')
 			expected("\"]\"", str, end);
 		str = skip_ws(str + 1, end);
+		attribute.arguments = buf_get_ptr(&arguments);
+		attribute.argument_count = buf_get_element_count(&arguments);
+		attribute.parameters = buf_get_ptr(&parameters);
+		attribute.parameter_count = buf_get_element_count(&parameters);
+		buf_push(&attributes, &attribute);
 	}
-	return str;
+	return (attrib_str_pair_t) { buf_get_ptr(&attributes), buf_get_element_count(&attributes), str };
 }
 
-static const char* parse(const char* str, const char* const start, const char* const end)
+typedef struct node_str_pair_t
+{
+	v3d_generic_node_t* node;
+	const char* str;
+} node_str_pair_t;
+
+static node_str_pair_t parse(const char* str, const char* const start, const char* const end)
 {
 	str = skip_ws(str, end);
 
+	v3d_generic_node_t* node = node_create();
 	bool is_parse = true;
-	str = parse_attributes(str, start, end, &is_parse);
-	
+	attrib_str_pair_t attributes = parse_attributes(str, start, end, &is_parse);
+	str = attributes.str;
+	node->attributes = attributes.attributes;
+	node->attribute_count = attributes.attribute_count;
+
+	BUFFER list = buf_new(u32_pair_t);
 	char buffer[2] = { *str, 0 };
 	while(strpbrk("{};,=[", buffer) == NULL)
 	{
 		u32_pair_t pair;
-		const char* _str = get_token(str, ",{;\t\n ", start, end, &pair);
-		debug_log_info("token: %.*s", U32_PAIR_DIFF(pair), str);
-		str = _str;
+		str = get_token(str, ",{;\t\n ", start, end, &pair);
+		buf_push(&list, &pair);
 		buffer[0] = *str;
 	}
+
+	node->qualifiers = buf_get_ptr(&list);
+	node->qualifier_count = buf_get_element_count(&list);
 
 L2:
 	switch(*str)
@@ -105,12 +133,19 @@ L2:
 			str++;
 			if(is_parse)
 			{
+				list = buf_new(v3d_generic_node_t*);
 				while(*str != '}')
-					str = parse(str, start, end);
+				{
+					node_str_pair_t node = parse(str, start, end);
+					buf_push(&list, &node.node);
+					str = node.str;
+				}
+				node->childs = buf_get_ptr(&list);
+				node->child_count = buf_get_element_count(&list);
 			}
 			else
 			{
-				u32_pair_t unparsed = { str - start };
+				node->unparsed.start =  str - start;
 				int depth = 1;
 				do
 				{
@@ -125,39 +160,70 @@ L2:
 							break;
 					}
 				} while ((depth != 0) || (*str != '}'));
-				unparsed.end = str - start;
+				node->unparsed.end = str - start;
 			}
 		case ',':
 		case ';':
-			return str + 1;
+			return (node_str_pair_t) { node, str + 1 };
 		case '}':
-			return str;
+			return (node_str_pair_t) { node, str };
 		case '[':
 			str = skip_ws(str + 1, end);
+			list = buf_new(u32_pair_t);
 			while(*str != ']')
 			{
 				u32_pair_t pair;
-				const char* _str = get_token(str, "]\t\n ", start, end, &pair);
-				debug_log_info("Indexer: %.*s", U32_PAIR_DIFF(pair), str);
-				str = _str;
+				str = get_token(str, "]\t\n ", start, end, &pair);
+				buf_push(&list, &pair);
 			}
+			node->indexers = buf_get_ptr(&list);
+			node->indexer_count = buf_get_element_count(&list);
 			str = skip_ws(str + 1, end);
 			goto L2;
 		case '=':
 			str = skip_ws(str + 1, end);
-			u32_pair_t pair;
-			const char* _str = get_token(str, ",;\t\n ", start, end, &pair);
-			debug_log_info("Value: %.*s", U32_PAIR_DIFF(pair), str);
-			str = _str;
+			str = get_token(str, ",;\t\n ", start, end, &node->value);
 			goto L2;
 	}
-	return str;
+	return (node_str_pair_t) { node, str };
 }
 
+
+static void debug_node(v3d_generic_node_t* node, const char* start)
+{
+	if(node->attribute_count > 0)
+		debug_log_info("Attributes: ");
+	for(u32 i = 0; i < node->attribute_count; i++)
+	{
+		debug_log_info("\tName: %.*s", U32_PAIR_DIFF(node->attributes[i].name), start + node->attributes[i].name.start);
+		if(node->attributes[i].parameter_count > 0)
+			debug_log_info("\tParameters: ");
+		for(u32 j = 0; j < node->attributes[i].parameter_count; j++)
+			debug_log_info("\t\t%.*s = %.*s", U32_PAIR_DIFF(node->attributes[i].parameters[j]), start + node->attributes[i].parameters[j].start,
+				U32_PAIR_DIFF(node->attributes[i].arguments[j]), start + node->attributes[i].arguments[j].start);
+	}
+
+	if(node->qualifier_count > 0)
+		debug_log_info("Qualifiers: ");
+	for(u32 i = 0; i < node->qualifier_count; i++)
+		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->qualifiers[i]), node->qualifiers[i].start + start);
+
+	if(node->indexer_count > 0)
+		debug_log_info("Indexers: ");
+	for(u32 i = 0; i < node->indexer_count; i++)
+		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->indexers[i]), node->indexers[i].start + start);
+
+	if(node->value.end != node->value.start)
+		debug_log_info("Value: %.*s", U32_PAIR_DIFF(node->value), node->value.start + start);
+
+	for(u32 i = 0; i < node->child_count; i++)
+		debug_node(node->childs[i], start);
+}
 
 PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* string, u32 length)
 {
 	ppsr_v3d_generic_parse_result_t result = { NULL, NULL, PPSR_SUCCESS };
-	parse(string, string, string + length);
+	result.root = parse(string, string, string + length).node;
+	debug_node(result.root, string);
 	return result;
 }

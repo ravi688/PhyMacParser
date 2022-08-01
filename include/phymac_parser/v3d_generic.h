@@ -13,13 +13,6 @@ typedef struct u32_pair_t
 #define U32_PAIR_INVALID (u32_pair_t) { 0UL, 0UL }
 static FORCE_INLINE u32 U32_PAIR_DIFF(u32_pair_t pair) { return pair.end - pair.start; }
 
-typedef enum v3d_generic_node_type_t
-{
-	V3D_GENERIC_NODE_TYPE_INVALID,
-	V3D_GENERIC_NODE_TYPE_FIELD,
-	V3D_GENERIC_NODE_TYPE_BLOCK
-} v3d_generic_node_type_t;
-
 typedef struct v3d_generic_attribute_t
 {
 	u32_pair_t name; 			// name of the attribute/function
@@ -33,30 +26,23 @@ typedef struct v3d_generic_node_t v3d_generic_node_t;
 
 typedef struct v3d_generic_node_t
 {
-	u32_pair_t name;						// name of this node { could be field or block type }
-	v3d_generic_node_type_t node_type;		// type of this node
-	v3d_generic_node_t* childs; 			// list of childs of this node
+	v3d_generic_node_t** childs; 			// list of childs of this node
 	u32 child_count;	 					// number of childs of this node
+
 	v3d_generic_attribute_t* attributes; 	// list of attributes of this node
 	u32 attribute_count;					// number of attributes of this node
+
+	u32_pair_t* qualifiers; 				// list of qualifiers of this node
+	u32 qualifier_count; 					// number of qualifiers of this node
+
+	u32_pair_t name; 						// identification name of this node
+
+	u32_pair_t* indexers; 					// list of indexers
+	u32 indexer_count; 						// number of indexers
+
 	u32_pair_t unparsed;	 				// unparsed content if [NoParse] attribute applied to a node
+	u32_pair_t value; 						// value assigned to this node
 } v3d_generic_node_t;
-
-
-/*V3D_GENERIC_NODE_TYPE_FIELD*/
-typedef struct v3d_generic_field_t
-{
-	v3d_generic_node_t _;
-	u32_pair_t* qualifiers; 	// list of the qualifiers of the field
-	u32 qualifier_count; 		// number of qualilfiers of the field
-	u32_pair_t name; 			// name of this field
-} v3d_generic_field_t;
-
-/*V3D_GENERIC_NODE_TYPE_BLOCK*/
-typedef struct v3d_generic_block_t
-{
-	v3d_generic_node_t _;
-} v3d_generic_block_t;
 
 typedef struct ppsr_v3d_generic_parse_result_t
 {
