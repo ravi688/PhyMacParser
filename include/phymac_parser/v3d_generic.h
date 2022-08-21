@@ -1,4 +1,33 @@
 
+/*
+
+ V3d Generic language structure
+ --------------------------------
+
+
+[AttributeName1(Argument1, Argument2, Parameter3 = Argument3)]
+Qualifier1 Qualifer2 
+{
+	[AttributeName2]
+	Qualifier1
+	{
+		qualifier1 qualifier2[indexer0][indexer1][indexer2];
+		qualifier2 = 
+		{
+			value1,
+			value2,
+			value3
+		};
+	}
+
+	[NoParse]
+	{
+		// Unparsed data
+	}
+}
+
+ */
+
 #pragma once
 
 #include <phymac_parser/defines.h>

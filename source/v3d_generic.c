@@ -7,6 +7,8 @@
 #include <BufferLib/buffer.h>
 
 
+#define NO_PARSE_ATTRIB "NoParse"
+
 static const char* check(const char* str, const char* const end)
 {
 	if(str >= end)
@@ -50,7 +52,7 @@ static attrib_str_pair_t parse_attributes(const char* str, const char* const sta
 		str = skip_ws(str + 1, end);
 		v3d_generic_attribute_t attribute;
 		const char* _str = get_token(str, "(]\t\n ", start, end, &attribute.name);
-		if(strncmp("NoParse", str, U32_PAIR_DIFF(attribute.name)) == 0)
+		if(strncmp(NO_PARSE_ATTRIB, str, U32_PAIR_DIFF(attribute.name)) == 0)
 			*is_parse = false;
 		str = _str;
 		BUFFER parameters = buf_new(u32_pair_t);
