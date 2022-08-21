@@ -35,13 +35,13 @@ typedef struct v3d_generic_node_t
 	u32_pair_t* qualifiers; 				// list of qualifiers of this node
 	u32 qualifier_count; 					// number of qualifiers of this node
 
-	u32_pair_t name; 						// identification name of this node
-
 	u32_pair_t* indexers; 					// list of indexers
 	u32 indexer_count; 						// number of indexers
 
 	u32_pair_t unparsed;	 				// unparsed content if [NoParse] attribute applied to a node
-	u32_pair_t value; 						// value assigned to this node
+
+	bool has_value; 						// true if this node has been assigned value, otherwise false
+	v3d_generic_node_t* value;				//
 } v3d_generic_node_t;
 
 typedef struct ppsr_v3d_generic_parse_result_t

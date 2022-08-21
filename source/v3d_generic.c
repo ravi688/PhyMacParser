@@ -133,7 +133,7 @@ L2:
 			str++;
 			if(is_parse)
 			{
-				list = buf_new(v3d_generic_node_t*);
+				BUFFER list = buf_new(v3d_generic_node_t*);
 				while(*str != '}')
 				{
 					node_str_pair_t node = parse(str, start, end);
@@ -182,7 +182,10 @@ L2:
 			goto L2;
 		case '=':
 			str = skip_ws(str + 1, end);
-			str = get_token(str, ",;\t\n ", start, end, &node->value);
+			node->has_value = true;
+			node_str_pair_t pair = parse(str, start, end);
+			node->value = pair.node;
+			str = pair.str;
 			goto L2;
 	}
 	return (node_str_pair_t) { node, str };
@@ -213,8 +216,14 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 	for(u32 i = 0; i < node->indexer_count; i++)
 		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->indexers[i]), node->indexers[i].start + start);
 
-	if(node->value.end != node->value.start)
-		debug_log_info("Value: %.*s", U32_PAIR_DIFF(node->value), node->value.start + start);
+	if(node->has_value)
+	{
+		debug_log_info("Value: ");
+		debug_node(node->value, start);
+	}
+
+	if(node->unparsed.start != node->unparsed.end)
+		debug_log_info("Unparsed: %.*s", U32_PAIR_DIFF(node->unparsed), node->unparsed.start + start);
 
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
@@ -224,6 +233,8 @@ PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* stri
 {
 	ppsr_v3d_generic_parse_result_t result = { NULL, NULL, PPSR_SUCCESS };
 	result.root = parse(string, string, string + length).node;
+	#ifdef GLOBAL_DEBUG
 	debug_node(result.root, string);
+	#endif
 	return result;
 }

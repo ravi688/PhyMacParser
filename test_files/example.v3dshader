@@ -62,7 +62,7 @@ Shader
                 colorBlend { } 
                 depthStencil
                 {
-                    depthTestEnable = true
+                    depthTestEnable = { true, false, true, false }
                     depthWriteEnable = true
                 }
             }
