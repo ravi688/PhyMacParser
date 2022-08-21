@@ -96,6 +96,11 @@ L1:
 	return (attrib_str_pair_t) { buf_get_ptr(&attributes), buf_get_element_count(&attributes), str };
 }
 
+static bool node_is_empty(v3d_generic_node_t* node)
+{
+	return (node == NULL) || ((node->indexer_count == 0) && (node->child_count == 0) && (node->attribute_count == 0) && (node->qualifier_count == 0) && (node->unparsed.start == node->unparsed.end));
+}
+
 typedef struct node_str_pair_t
 {
 	v3d_generic_node_t* node;
@@ -130,15 +135,17 @@ L2:
 	switch(*str)
 	{
 		case '{':
-			str++;
+			str = skip_ws(str + 1, end);
 			if(is_parse)
 			{
 				BUFFER list = buf_new(v3d_generic_node_t*);
 				while(*str != '}')
 				{
 					node_str_pair_t node = parse(str, start, end);
-					buf_push(&list, &node.node);
-					str = node.str;
+					if(!node_is_empty(node.node))
+						buf_push(&list, &node.node);
+					else free(node.node);
+					str = skip_ws(node.str, end);
 				}
 				node->childs = buf_get_ptr(&list);
 				node->child_count = buf_get_element_count(&list);
@@ -194,6 +201,7 @@ L2:
 
 static void debug_node(v3d_generic_node_t* node, const char* start)
 {
+	debug_log_info("[Node]: ");
 	if(node->attribute_count > 0)
 		debug_log_info("Attributes: ");
 	for(u32 i = 0; i < node->attribute_count; i++)
@@ -225,6 +233,8 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 	if(node->unparsed.start != node->unparsed.end)
 		debug_log_info("Unparsed: %.*s", U32_PAIR_DIFF(node->unparsed), node->unparsed.start + start);
 
+	if(node->child_count > 0)
+		debug_log_info("Childs: %u", node->child_count);
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
 }
