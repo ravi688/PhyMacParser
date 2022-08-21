@@ -1,21 +1,14 @@
 
 #include <phymac_parser/debug.h>
 #include <phymac_parser/assert.h>
-
 #include <phymac_parser/v3d_generic.h>
+#include <disk_manager/file_reader.h>
 
 int main(int argc, char** argv)
 {
-	debug_log_info("PhyMac parser");
-
-	ppsr_v3d_generic_callbacks_t callbacks =
-	{
-		.user_data = NULL
-	};
-
-	ppsr_result_t result = ppsr_v3d_generic_parse("testfiles/shader.glsl", &callbacks);
-
-	assert(result == PPSR_SUCCESS);
-
+	BUFFER* text = load_text_from_file("test_files/example.v3dshader");
+	ppsr_v3d_generic_parse_result_t result = ppsr_v3d_generic_parse(buf_get_ptr(text), buf_get_element_count(text) - 1);
+	assert(result.result == PPSR_SUCCESS);
+	buf_free(text);
 	return 0;
 }
