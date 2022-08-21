@@ -18,8 +18,8 @@ EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBS = 
 
-DEPENDENCIES = DiskManager
-DEPENDENCY_LIBS = DiskManager/lib/diskmanager.a DiskManager/shared-dependencies/CallTrace/lib/calltrace.a
+DEPENDENCIES = DiskManager DiskManager/shared-dependencies/CallTrace DiskManager/dependencies/BufferLib
+DEPENDENCY_LIBS = DiskManager/lib/diskmanager.a DiskManager/shared-dependencies/CallTrace/lib/calltrace.a DiskManager/dependencies/BufferLib/lib/bufferlib.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = 
 SHARED_DEPENDENCY_LIBS = 
