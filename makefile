@@ -18,8 +18,8 @@ EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBS = 
 
-DEPENDENCIES = DiskManager DiskManager/shared-dependencies/CallTrace DiskManager/dependencies/BufferLib
-DEPENDENCY_LIBS = DiskManager/lib/diskmanager.a DiskManager/shared-dependencies/CallTrace/lib/calltrace.a DiskManager/dependencies/BufferLib/lib/bufferlib.a
+DEPENDENCIES = DiskManager Common DiskManager/shared-dependencies/CallTrace DiskManager/dependencies/BufferLib
+DEPENDENCY_LIBS = DiskManager/lib/diskmanager.a Common/lib/common.a DiskManager/shared-dependencies/CallTrace/lib/calltrace.a DiskManager/dependencies/BufferLib/lib/bufferlib.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = 
 SHARED_DEPENDENCY_LIBS = 
@@ -183,7 +183,7 @@ debug: $(TARGET)
 
 
 %.o : %.c
-	@echo Compiling $< to $@
+	@echo [Log] Compiling $< to $@
 	$(COMPILER) $(COMPILER_FLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 %.a:
@@ -232,6 +232,7 @@ bin-clean:
 	$(RM_DIR) $(TARGET_LIB_DIR)
 	@echo [Log] Binaries cleaned successfully!
 	$(MAKE) --directory=./dependencies/DiskManager clean
+	$(MAKE) --directory=./dependencies/Common clean
 # 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/HPML clean

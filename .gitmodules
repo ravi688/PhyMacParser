@@ -1,3 +1,6 @@
 [submodule "dependencies/DiskManager"]
 	path = dependencies/DiskManager
 	url = https://github.com/ravi688/DiskManager.git
+[submodule "dependencies/Common"]
+	path = dependencies/Common
+	url = https://github.com/ravi688/Common.git
