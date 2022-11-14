@@ -6,6 +6,7 @@ typedef enum ppsr_result_t
 {
 	PPSR_SUCCESS,
 	PPSR_WARNING,
+	PSSR_ERROR,
 	PPSR_ERROR_UNKOWN
 } ppsr_result_t;
 
