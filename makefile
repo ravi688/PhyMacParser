@@ -183,6 +183,7 @@ debug: $(TARGET)
 
 
 %.o : %.c
+	@echo Compiling $< to $@
 	$(COMPILER) $(COMPILER_FLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 %.a:
