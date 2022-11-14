@@ -18,8 +18,8 @@ EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBS = 
 
-DEPENDENCIES = ../../MeshLib/dependencies/DiskManager
-DEPENDENCY_LIBS = ../../MeshLib/dependencies/DiskManager/lib/diskmanager.a ../../SafeMemory/shared-dependencies/CallTrace/lib/calltrace.a
+DEPENDENCIES = ../../MeshLib/dependencies/DiskManager ../../Common ../../../shared-dependencies/BufferLib ../../../shared-dependencies/BufferLib/lib/bufferlib.a ../../SafeMemory/shared-dependencies/CallTrace
+DEPENDENCY_LIBS = ../../MeshLib/dependencies/DiskManager/lib/diskmanager.a ../../Common/lib/common.a ../../../shared-dependencies/BufferLib/lib/bufferlib.a ../../SafeMemory/shared-dependencies/CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = 
 SHARED_DEPENDENCY_LIBS = 
@@ -183,6 +183,7 @@ debug: $(TARGET)
 
 
 %.o : %.c
+	@echo [Log] Compiling $< to $@
 	$(COMPILER) $(COMPILER_FLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 %.a:
@@ -231,6 +232,7 @@ bin-clean:
 	$(RM_DIR) $(TARGET_LIB_DIR)
 	@echo [Log] Binaries cleaned successfully!
 	$(MAKE) --directory=./dependencies/../../MeshLib/dependencies/DiskManager clean
+	$(MAKE) --directory=./dependencies/../../Common clean
 	$(MAKE) --directory=./../SafeMemory/shared-dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/HPML clean
