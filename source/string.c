@@ -7,7 +7,7 @@
 
 static void unexpected_end_of_file()
 {
-	debug_log_fetal_error("Unexpected end of file while parsing, exiting");
+	DEBUG_LOG_FETAL_ERROR("Unexpected end of file while parsing, exiting");
 }
 
 #define CHECKED_RETURN(ptr) if((ptr) >= end) unexpected_end_of_file(); return CAST_TO(char*, (ptr))
