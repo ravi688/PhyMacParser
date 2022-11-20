@@ -12,13 +12,13 @@
 static const char* check(const char* str, const char* const end)
 {
 	if(str >= end)
-		debug_log_fetal_error("Unexpected end of file while parsing, exiting");
+		DEBUG_LOG_FETAL_ERROR("Unexpected end of file while parsing, exiting");
 	return str;
 }
 
 static void expected(const char* exp_str, const char* str, const char* const end)
 {
-	debug_log_fetal_error("Unexpected \"%.*s\", expected %s", get_token_length(str, end), str, exp_str);
+	DEBUG_LOG_FETAL_ERROR("Unexpected \"%.*s\", expected %s", get_token_length(str, end), str, exp_str);
 }
 
 static v3d_generic_node_t* node_create()
@@ -203,6 +203,8 @@ L2:
 
 static void debug_node(v3d_generic_node_t* node, const char* start)
 {
+	DEBUG_BLOCK (
+
 	debug_log_info("[Node]: ");
 	if(node->attribute_count > 0)
 		debug_log_info("Attributes: ");
@@ -239,14 +241,17 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 		debug_log_info("Childs: %u", node->child_count);
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
+
+	)
 }
 
 PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* string, u32 length)
 {
 	ppsr_v3d_generic_parse_result_t result = { NULL, NULL, PPSR_SUCCESS };
 	result.root = parse(string, string, string + length).node;
-	#ifdef GLOBAL_DEBUG
-	debug_node(result.root, string);
-	#endif
+	DEBUG_BLOCK
+	(
+		debug_node(result.root, string);
+	)
 	return result;
 }
