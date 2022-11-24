@@ -65,20 +65,26 @@ static attrib_str_pair_t parse_attributes(const char* str, const char* const sta
 				str = skip_ws(str, end);
 				u32_pair_t pair;
 				str = get_token(str, ",=)]\t\n ", start, end, &pair);
+				bool found_param = false;
 L1:
 				switch(*str)
 				{
 					case ',':
 						str = check(str + 1, end);
 					case ')':
-						buf_push(&arguments, &pair);
-						buf_push_pseudo(&parameters, 1);
+						if(!found_param)
+						{
+							buf_push(&arguments, &pair);
+							buf_push_pseudo(&parameters, 1);
+							found_param = false;
+						}
 						continue;
 					case '=':
 						buf_push(&parameters, &pair);
 						str = skip_ws(str + 1, end);
 						str = get_token(str, ",)]\t\n ", start, end, &pair);
 						buf_push(&arguments, &pair);
+						found_param = true;
 						goto L1;
 					default:
 						expected("\",\" \"=\" or \")\"", str, end);
