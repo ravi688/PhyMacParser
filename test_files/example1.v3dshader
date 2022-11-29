@@ -1,0 +1,15 @@
+
+
+Block1 {
+	
+	NestedBlock
+	{
+		myProperty
+	}
+
+}
+
+Block2 
+{
+	NestedBlock2 { } 
+}

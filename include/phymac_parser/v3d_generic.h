@@ -39,7 +39,8 @@ typedef struct u32_pair_t
 	u32 end;
 } u32_pair_t;
 
-#define U32_PAIR_INVALID (u32_pair_t) { 0UL, 0UL }
+#define U32_PAIR_INVALID ((u32_pair_t) { 0UL, 0UL })
+#define U32_PAIR_IS_INVALID(pair) (((pair).start == 0UL) && ((pair).end == 0UL))
 static FORCE_INLINE u32 U32_PAIR_DIFF(u32_pair_t pair) { return pair.end - pair.start; }
 
 typedef struct v3d_generic_attribute_t
