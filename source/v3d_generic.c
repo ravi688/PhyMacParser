@@ -164,18 +164,18 @@ L2:
 				int depth = 1;
 				do
 				{
-					str++;
 					switch(*str)
 					{
 						case '{':
 							depth++;
 							break;
-						case '}':
+						case '}': 
 							depth--;
 							break;
 					}
-				} while ((depth != 0) || (*str != '}'));
-				node->unparsed.end = str - start;
+					str = check(str + 1, end);
+				} while (depth != 0);
+				node->unparsed.end = str - start - 1;
 			}
 		case ',':
 		case ';':
@@ -207,30 +207,27 @@ L2:
 }
 
 
+DEBUG_BLOCK (
+
 static void debug_node(v3d_generic_node_t* node, const char* start)
 {
-	DEBUG_BLOCK (
 
 	debug_log_info("[Node]: ");
-	if(node->attribute_count > 0)
-		debug_log_info("Attributes: ");
+	debug_log_info("Attributes: %lu", node->attribute_count);
 	for(u32 i = 0; i < node->attribute_count; i++)
 	{
 		debug_log_info("\tName: %.*s", U32_PAIR_DIFF(node->attributes[i].name), start + node->attributes[i].name.start);
-		if(node->attributes[i].parameter_count > 0)
-			debug_log_info("\tParameters: ");
+		debug_log_info("\tParameters: %lu", node->attributes[i].parameter_count);
 		for(u32 j = 0; j < node->attributes[i].parameter_count; j++)
 			debug_log_info("\t\t%.*s = %.*s", U32_PAIR_DIFF(node->attributes[i].parameters[j]), start + node->attributes[i].parameters[j].start,
 				U32_PAIR_DIFF(node->attributes[i].arguments[j]), start + node->attributes[i].arguments[j].start);
 	}
 
-	if(node->qualifier_count > 0)
-		debug_log_info("Qualifiers: ");
+	debug_log_info("Qualifiers: %lu", node->qualifier_count);
 	for(u32 i = 0; i < node->qualifier_count; i++)
 		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->qualifiers[i]), node->qualifiers[i].start + start);
 
-	if(node->indexer_count > 0)
-		debug_log_info("Indexers: ");
+	debug_log_info("Indexers: %lu", node->indexer_count);
 	for(u32 i = 0; i < node->indexer_count; i++)
 		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->indexers[i]), node->indexers[i].start + start);
 
@@ -243,21 +240,40 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 	if(node->unparsed.start != node->unparsed.end)
 		debug_log_info("Unparsed: %.*s", U32_PAIR_DIFF(node->unparsed), node->unparsed.start + start);
 
-	if(node->child_count > 0)
-		debug_log_info("Childs: %u", node->child_count);
+	debug_log_info("Childs: %u", node->child_count);
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
-
-	)
 }
+	)
 
-PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* string, u32 length)
+PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* start, u32 length)
 {
+	const char* str = start;
+	const char* end = str + length;
+
+	v3d_generic_node_t* root = node_create();
+	BUFFER list = buf_new(v3d_generic_node_t*);
+	
+	while(str < end)
+	{
+		AUTO result = parse(str, start, end);
+		buf_push(&list, &result.node);
+		str = skip_ws(result.str, end);
+		if((str != end) && ((str + 1) == end))
+			str = end;
+	}
+	
+	if(buf_get_element_count(&list) == 0)
+		return (ppsr_v3d_generic_parse_result_t) { NULL, NULL, PPSR_SUCCESS };
+
+	root->childs = CAST_TO(v3d_generic_node_t**, buf_get_ptr(&list));
+	root->child_count = buf_get_element_count(&list);
+
 	ppsr_v3d_generic_parse_result_t result = { NULL, NULL, PPSR_SUCCESS };
-	result.root = parse(string, string, string + length).node;
+	result.root = root;
 	DEBUG_BLOCK
 	(
-		debug_node(result.root, string);
+		debug_node(result.root, start);
 	)
 	return result;
 }
