@@ -4,7 +4,9 @@
 #include <phymac_parser/string.h> // for custom string functions
 #include <string.h>		// for memory and string functions
 #include <stdlib.h> 	// for malloc
-#include <BufferLib/buffer.h>
+
+// NOTE: earlier this used to be <BufferLib/buffer.h>, since linux is case-sensitive, we need to use <bufferlib/buffer.h> here.
+#include <bufferlib/buffer.h>
 
 
 #define NO_PARSE_ATTRIB "NoParse"
