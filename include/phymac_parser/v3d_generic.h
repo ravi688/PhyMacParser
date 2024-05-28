@@ -32,6 +32,7 @@ Qualifier1 Qualifer2
 
 #include <phymac_parser/defines.h>
 #include <phymac_parser/result.h>
+#include <common/allocation_callbacks.h>
 
 typedef struct u32_pair_t
 {
@@ -92,6 +93,7 @@ BEGIN_CPP_COMPATIBLE
 	returns:
 		ppsr_v3d_generic_parse_result_t containing the parsed AST, log buffer and result code
  */
-PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* string, u32 length);
+PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks, const char* string, u32 length);
+PPSR_API void ppsr_v3d_generic_parse_result_destroy(com_allocation_callbacks_t* callbacks, ppsr_v3d_generic_parse_result_t result);
 
 END_CPP_COMPATIBLE

@@ -3,7 +3,6 @@
 #include <phymac_parser/debug.h>
 #include <phymac_parser/string.h> // for custom string functions
 #include <string.h>		// for memory and string functions
-#include <stdlib.h> 	// for malloc
 
 // NOTE: earlier this used to be <BufferLib/buffer.h>, since linux is case-sensitive, we need to use <bufferlib/buffer.h> here.
 #include <bufferlib/buffer.h>
@@ -23,9 +22,9 @@ static void expected(const char* exp_str, const char* str, const char* const end
 	DEBUG_LOG_FETAL_ERROR("Unexpected \"%.*s\", expected %s", get_token_length(str, end), str, exp_str);
 }
 
-static v3d_generic_node_t* node_create()
+static v3d_generic_node_t* node_create(com_allocation_callbacks_t* callbacks)
 {
-	v3d_generic_node_t* node = (v3d_generic_node_t*)malloc(sizeof(v3d_generic_node_t));
+	v3d_generic_node_t* node = (v3d_generic_node_t*)com_call_allocate(callbacks, sizeof(v3d_generic_node_t));
 	memset(node, 0, sizeof(v3d_generic_node_t));
 	return node;
 }
@@ -46,9 +45,9 @@ typedef struct attrib_str_pair_t
 	const char* str;
 } attrib_str_pair_t;
 
-static attrib_str_pair_t parse_attributes(const char* str, const char* const start, const char* const end, bool OUT is_parse)
+static attrib_str_pair_t parse_attributes(com_allocation_callbacks_t* callbacks, const char* str, const char* const start, const char* const end, bool OUT is_parse)
 {
-	BUFFER attributes = buf_new(v3d_generic_attribute_t);
+	BUFFER attributes = buf_new_with_callbacks(callbacks, v3d_generic_attribute_t);
 	while(*str == '[')
 	{
 		str = skip_ws(str + 1, end);
@@ -57,8 +56,8 @@ static attrib_str_pair_t parse_attributes(const char* str, const char* const sta
 		if(strncmp(NO_PARSE_ATTRIB, str, U32_PAIR_DIFF(attribute.name)) == 0)
 			*is_parse = false;
 		str = _str;
-		BUFFER parameters = buf_new(u32_pair_t);
-		BUFFER arguments = buf_new(u32_pair_t);
+		BUFFER parameters = buf_new_with_callbacks(callbacks, u32_pair_t);
+		BUFFER arguments = buf_new_with_callbacks(callbacks, u32_pair_t);
 		if(*str == '(')
 		{
 			str++;
@@ -117,18 +116,18 @@ typedef struct node_str_pair_t
 	const char* str;
 } node_str_pair_t;
 
-static node_str_pair_t parse(const char* str, const char* const start, const char* const end)
+static node_str_pair_t parse(com_allocation_callbacks_t* callbacks, const char* str, const char* const start, const char* const end)
 {
 	str = skip_ws(str, end);
 
-	v3d_generic_node_t* node = node_create();
+	v3d_generic_node_t* node = node_create(callbacks);
 	bool is_parse = true;
-	attrib_str_pair_t attributes = parse_attributes(str, start, end, &is_parse);
+	attrib_str_pair_t attributes = parse_attributes(callbacks, str, start, end, &is_parse);
 	str = attributes.str;
 	node->attributes = attributes.attributes;
 	node->attribute_count = attributes.attribute_count;
 
-	BUFFER list = buf_new(u32_pair_t);
+	BUFFER list = buf_new_with_callbacks(callbacks, u32_pair_t);
 	char buffer[2] = { *str, 0 };
 	while(strpbrk("{};,=[", buffer) == NULL)
 	{
@@ -148,13 +147,13 @@ L2:
 			str = skip_ws(str + 1, end);
 			if(is_parse)
 			{
-				BUFFER list = buf_new(v3d_generic_node_t*);
+				BUFFER list = buf_new_with_callbacks(callbacks, v3d_generic_node_t*);
 				while(*str != '}')
 				{
-					node_str_pair_t node = parse(str, start, end);
+					node_str_pair_t node = parse(callbacks, str, start, end);
 					if(!node_is_empty(node.node))
 						buf_push(&list, &node.node);
-					else free(node.node);
+					else com_call_deallocate(callbacks, node.node);
 					str = skip_ws(node.str, end);
 				}
 				node->childs = buf_get_ptr(&list);
@@ -186,7 +185,7 @@ L2:
 			return (node_str_pair_t) { node, str };
 		case '[':
 			str = skip_ws(str + 1, end);
-			list = buf_new(u32_pair_t);
+			list = buf_new_with_callbacks(callbacks, u32_pair_t);
 			while(*str != ']')
 			{
 				u32_pair_t pair;
@@ -200,7 +199,7 @@ L2:
 		case '=':
 			str = skip_ws(str + 1, end);
 			node->has_value = true;
-			node_str_pair_t pair = parse(str, start, end);
+			node_str_pair_t pair = parse(callbacks, str, start, end);
 			node->value = pair.node;
 			str = pair.str;
 			goto L2;
@@ -248,17 +247,17 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 }
 	)
 
-PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* start, u32 length)
+PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks, const char* start, u32 length)
 {
 	const char* str = start;
 	const char* end = str + length;
 
-	v3d_generic_node_t* root = node_create();
-	BUFFER list = buf_new(v3d_generic_node_t*);
+	v3d_generic_node_t* root = node_create(callbacks);
+	BUFFER list = buf_new_with_callbacks(callbacks, v3d_generic_node_t*);
 	
 	while(str < end)
 	{
-		AUTO result = parse(str, start, end);
+		AUTO result = parse(callbacks, str, start, end);
 		buf_push(&list, &result.node);
 		str = skip_ws(result.str, end);
 		if((str != end) && ((str + 1) == end))
@@ -278,4 +277,39 @@ PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(const char* star
 		debug_node(result.root, start);
 	)
 	return result;
+}
+
+void destroy_attribute(com_allocation_callbacks_t* callbacks, v3d_generic_attribute_t* attribute)
+{
+	if(attribute->argument_count > 0)
+		com_call_deallocate(callbacks, attribute->arguments);
+	if(attribute->parameter_count > 0)
+		com_call_deallocate(callbacks, attribute->parameters);
+}
+
+void destroy_node(com_allocation_callbacks_t* callbacks, v3d_generic_node_t* node)
+{
+	for(u32 i = 0; i < node->child_count; i++)
+		destroy_node(callbacks, node->childs[i]);
+	if(node->child_count > 0)
+		com_call_deallocate(callbacks, node->childs);
+	for(u32 i = 0; i < node->attribute_count; i++)
+		destroy_attribute(callbacks, &node->attributes[i]);
+	if(node->attribute_count > 0)
+		com_call_deallocate(callbacks, node->attributes);
+	if(node->qualifier_count > 0)
+		com_call_deallocate(callbacks, node->qualifiers);
+	if(node->indexer_count > 0)
+		com_call_deallocate(callbacks, node->indexers);
+	if(node->value != NULL)
+		destroy_node(callbacks, node->value);
+	com_call_deallocate(callbacks, node);
+}
+
+PPSR_API void ppsr_v3d_generic_parse_result_destroy(com_allocation_callbacks_t* callbacks, ppsr_v3d_generic_parse_result_t result)
+{
+	if(result.root != NULL)
+		destroy_node(callbacks, result.root);
+	if(result.log_buffer != NULL)
+		com_call_deallocate(callbacks, result.log_buffer);
 }
