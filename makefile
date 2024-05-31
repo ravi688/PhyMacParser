@@ -46,7 +46,7 @@ EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBRARIES = 
 
-DEPENDENCIES = ../../MeshLib/dependencies/DiskManager ../../Common ../../../shared-dependencies/BufferLib ../../../shared-dependencies/BufferLib/lib/bufferlib.a ../../SafeMemory/shared-dependencies/CallTrace
+DEPENDENCIES = ../../MeshLib/dependencies/DiskManager ../../Common ../../../shared-dependencies/BufferLib ../../SafeMemory/shared-dependencies/CallTrace
 DEPENDENCY_LIBS = ../../MeshLib/dependencies/DiskManager/lib/diskmanager.a ../../Common/lib/common.a ../../../shared-dependencies/BufferLib/lib/bufferlib.a ../../SafeMemory/shared-dependencies/CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = 
