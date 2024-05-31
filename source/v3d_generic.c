@@ -247,17 +247,18 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 }
 	)
 
-PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks, const char* start, u32 length)
+PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks_ptr, const char* start, u32 length)
 {
+	com_allocation_callbacks_t callbacks = (callbacks_ptr == NULL) ? com_allocation_callbacks_get_std() : *callbacks_ptr;
 	const char* str = start;
 	const char* end = str + length;
 
-	v3d_generic_node_t* root = node_create(callbacks);
-	BUFFER list = buf_new_with_callbacks(callbacks, v3d_generic_node_t*);
+	v3d_generic_node_t* root = node_create(&callbacks);
+	BUFFER list = buf_new_with_callbacks(&callbacks, v3d_generic_node_t*);
 	
 	while(str < end)
 	{
-		AUTO result = parse(callbacks, str, start, end);
+		AUTO result = parse(&callbacks, str, start, end);
 		buf_push(&list, &result.node);
 		str = skip_ws(result.str, end);
 		if((str != end) && ((str + 1) == end))
