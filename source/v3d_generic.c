@@ -144,6 +144,7 @@ L2:
 	switch(*str)
 	{
 		case '{':
+			node->is_block = true;
 			str = skip_ws(str + 1, end);
 			if(is_parse)
 			{

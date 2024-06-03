@@ -73,6 +73,8 @@ typedef struct v3d_generic_node_t
 
 	bool has_value; 						// true if this node has been assigned value, otherwise false
 	v3d_generic_node_t* value;				// node contaning the value of this node
+
+	bool is_block; 							// true if '<qualifiers> { }', false if '<qualifiers>;' etc.
 } v3d_generic_node_t;
 
 typedef struct ppsr_v3d_generic_parse_result_t
