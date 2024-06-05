@@ -1,0 +1,11 @@
+
+Shader
+{
+	struct Color
+	{
+		float x;
+		float y;
+		float z;
+		float w;
+	} color[3];
+}
