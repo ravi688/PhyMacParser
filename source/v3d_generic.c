@@ -132,7 +132,7 @@ static node_str_pair_t parse(com_allocation_callbacks_t* callbacks, const char* 
 	while(strpbrk("{};,=[", buffer) == NULL)
 	{
 		u32_pair_t pair;
-		str = get_token(str, ",{;\t\n ", start, end, &pair);
+		str = get_token(str, ",{[;\t\n ", start, end, &pair);
 		buf_push(&list, &pair);
 		buffer[0] = *str;
 	}
