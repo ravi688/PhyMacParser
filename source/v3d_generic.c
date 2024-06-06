@@ -209,9 +209,7 @@ L2:
 }
 
 
-DEBUG_BLOCK (
-
-static void debug_node(v3d_generic_node_t* node, const char* start)
+PPSR_API void debug_node(v3d_generic_node_t* node, const char* start)
 {
 
 	debug_log_info("[Node]: ");
@@ -246,7 +244,6 @@ static void debug_node(v3d_generic_node_t* node, const char* start)
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
 }
-	)
 
 PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks_ptr, const char* start, u32 length)
 {
