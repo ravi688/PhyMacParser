@@ -97,5 +97,6 @@ BEGIN_CPP_COMPATIBLE
  */
 PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_callbacks_t* callbacks, const char* string, u32 length);
 PPSR_API void ppsr_v3d_generic_parse_result_destroy(com_allocation_callbacks_t* callbacks, ppsr_v3d_generic_parse_result_t result);
+PPSR_API void debug_node(v3d_generic_node_t* node, const char* start);
 
 END_CPP_COMPATIBLE
