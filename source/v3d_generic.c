@@ -187,12 +187,12 @@ L2:
 		case '[':
 			str = skip_ws(str + 1, end);
 			list = buf_new_with_callbacks(callbacks, u32_pair_t);
-			while(*str != ']')
+			do
 			{
 				u32_pair_t pair;
 				str = get_token(str, "]\t\n ", start, end, &pair);
 				buf_push(&list, &pair);
-			}
+			} while(*str != ']');
 			node->indexers = buf_get_ptr(&list);
 			node->indexer_count = buf_get_element_count(&list);
 			str = skip_ws(str + 1, end);
