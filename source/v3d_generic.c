@@ -52,7 +52,7 @@ static attrib_str_pair_t parse_attributes(com_allocation_callbacks_t* callbacks,
 	{
 		str = skip_ws(str + 1, end);
 		v3d_generic_attribute_t attribute;
-		const char* _str = get_token(str, "(]\t\n ", start, end, &attribute.name);
+		const char* _str = get_token(str, "(]\t\n\r ", start, end, &attribute.name);
 		if(strncmp(NO_PARSE_ATTRIB, str, U32_PAIR_DIFF(attribute.name)) == 0)
 			*is_parse = false;
 		str = _str;
@@ -65,7 +65,7 @@ static attrib_str_pair_t parse_attributes(com_allocation_callbacks_t* callbacks,
 			{
 				str = skip_ws(str, end);
 				u32_pair_t pair;
-				str = get_token(str, ",=)]\t\n ", start, end, &pair);
+				str = get_token(str, ",=)]\t\n\r ", start, end, &pair);
 				bool found_param = false;
 L1:
 				switch(*str)
@@ -83,7 +83,7 @@ L1:
 					case '=':
 						buf_push(&parameters, &pair);
 						str = skip_ws(str + 1, end);
-						str = get_token(str, ",)]\t\n ", start, end, &pair);
+						str = get_token(str, ",)]\t\n\r ", start, end, &pair);
 						buf_push(&arguments, &pair);
 						found_param = true;
 						goto L1;
@@ -132,7 +132,7 @@ static node_str_pair_t parse(com_allocation_callbacks_t* callbacks, const char* 
 	while(strpbrk("{};,=[", buffer) == NULL)
 	{
 		u32_pair_t pair;
-		str = get_token(str, ",{[;\t\n ", start, end, &pair);
+		str = get_token(str, ",{[;\t\n\r ", start, end, &pair);
 		buf_push(&list, &pair);
 		buffer[0] = *str;
 	}
@@ -190,7 +190,7 @@ L2:
 			do
 			{
 				u32_pair_t pair;
-				str = get_token(str, "]\t\n ", start, end, &pair);
+				str = get_token(str, "]\t\n\r ", start, end, &pair);
 				buf_push(&list, &pair);
 			} while(*str != ']');
 			node->indexers = buf_get_ptr(&list);
