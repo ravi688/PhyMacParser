@@ -273,7 +273,7 @@ PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_c
 	result.root = root;
 	DEBUG_BLOCK
 	(
-		debug_node(result.root, start);
+		// debug_node(result.root, start);
 	)
 	return result;
 }
