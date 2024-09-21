@@ -1,0 +1,15 @@
+
+[Name("My Theme1")]
+[Model("GlobalThemeModel")]
+Theme
+{
+    LargeButton.IdleColor = Color4.green(1.0f);
+    LargeButton.HoverColor = Color4.red(1.0f);
+    LargeButton.PressColor = Color4.grey(1.0f);
+    SmallButton.IdleColor = Color4.green(1.0f);
+    SmallButton.HoverColor = Color4.red(1.0f);
+    SmallButton.PressColor = Color4.grey(1.0f);
+    MyColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    Folder.Open = "icons/Folder Open.png";
+    Folder.Close = "icons/Folder-Close.png";
+}

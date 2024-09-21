@@ -1,6 +1,7 @@
 
 #include <phymac_parser/v3d_generic.h>
 #include <phymac_parser/debug.h>
+#include <common/assert.h>
 #include <phymac_parser/string.h> // for custom string functions
 #include <string.h>		// for memory and string functions
 
@@ -38,6 +39,31 @@ static const char* get_token(const char* str, const char* delimiters, const char
 	return str;
 }
 
+static const char* get_token_as_string(const char* str, const char* const start, const char* const end, u32_pair_t OUT pair)
+{
+	_COM_ASSERT(str[0] == '"');
+	/* skip the ' " ' character' */
+	++str;
+	/* NOTE: it doesn't support escape sequences, we will add support as needed. But for now it is not needed. */
+	str = get_token(str, "\"", start, end, pair);
+	/* skip the ' " ' character' again */
+	++str;
+	str = skip_ws(str, end);
+	return str;
+}
+
+static const char* get_token_or_string(const char* str, const char* delimiters, const char* const start, const char* const end, u32_pair_t OUT pair)
+{
+	if(start >= end)
+		return end;
+
+	if(str[0] == '"')
+		str = get_token_as_string(str, start, end, pair);
+	else
+		str = get_token(str, delimiters, start, end, pair);
+	return str;
+}
+
 typedef struct attrib_str_pair_t
 {
 	v3d_generic_attribute_t* attributes;
@@ -65,7 +91,9 @@ static attrib_str_pair_t parse_attributes(com_allocation_callbacks_t* callbacks,
 			{
 				str = skip_ws(str, end);
 				u32_pair_t pair;
-				str = get_token(str, ",=)]\t\n\r ", start, end, &pair);
+				/* although, parameter name should not be enclosed in double quotes but lets consider this also
+				 * to include the case where it is used as a value to an implicit parameter, so it can be a string. */
+				str = get_token_or_string(str, ",=)]\t\n\r ", start, end, &pair);
 				bool found_param = false;
 L1:
 				switch(*str)
@@ -83,7 +111,8 @@ L1:
 					case '=':
 						buf_push(&parameters, &pair);
 						str = skip_ws(str + 1, end);
-						str = get_token(str, ",)]\t\n\r ", start, end, &pair);
+						/* value can be also string enclosed in double quotes */
+						str = get_token_or_string(str, ",)]\t\n\r ", start, end, &pair);
 						buf_push(&arguments, &pair);
 						found_param = true;
 						goto L1;
@@ -132,7 +161,8 @@ static node_str_pair_t parse(com_allocation_callbacks_t* callbacks, const char* 
 	while(strpbrk("{};,=[", buffer) == NULL)
 	{
 		u32_pair_t pair;
-		str = get_token(str, ",{[;\t\n\r ", start, end, &pair);
+		/* this can be also be string if used as rhs value */
+		str = get_token_or_string(str, ",{[;\t\n\r ", start, end, &pair);
 		buf_push(&list, &pair);
 		buffer[0] = *str;
 	}
@@ -273,7 +303,7 @@ PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_c
 	result.root = root;
 	DEBUG_BLOCK
 	(
-		// debug_node(result.root, start);
+		debug_node(result.root, start);
 	)
 	return result;
 }
