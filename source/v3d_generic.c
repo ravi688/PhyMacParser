@@ -242,35 +242,35 @@ L2:
 PPSR_API void debug_node(v3d_generic_node_t* node, const char* start)
 {
 
-	debug_log_info("[Node]: ");
-	debug_log_info("Attributes: %lu", node->attribute_count);
+	debug_log_info_verbose("[Node]: ");
+	debug_log_info_verbose("Attributes: %lu", node->attribute_count);
 	for(u32 i = 0; i < node->attribute_count; i++)
 	{
-		debug_log_info("\tName: %.*s", U32_PAIR_DIFF(node->attributes[i].name), start + node->attributes[i].name.start);
-		debug_log_info("\tParameters: %lu", node->attributes[i].parameter_count);
+		debug_log_info_verbose("\tName: %.*s", U32_PAIR_DIFF(node->attributes[i].name), start + node->attributes[i].name.start);
+		debug_log_info_verbose("\tParameters: %lu", node->attributes[i].parameter_count);
 		for(u32 j = 0; j < node->attributes[i].parameter_count; j++)
-			debug_log_info("\t\t%.*s = %.*s", U32_PAIR_DIFF(node->attributes[i].parameters[j]), start + node->attributes[i].parameters[j].start,
+			debug_log_info_verbose("\t\t%.*s = %.*s", U32_PAIR_DIFF(node->attributes[i].parameters[j]), start + node->attributes[i].parameters[j].start,
 				U32_PAIR_DIFF(node->attributes[i].arguments[j]), start + node->attributes[i].arguments[j].start);
 	}
 
-	debug_log_info("Qualifiers: %lu", node->qualifier_count);
+	debug_log_info_verbose("Qualifiers: %lu", node->qualifier_count);
 	for(u32 i = 0; i < node->qualifier_count; i++)
-		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->qualifiers[i]), node->qualifiers[i].start + start);
+		debug_log_info_verbose("\t%.*s", U32_PAIR_DIFF(node->qualifiers[i]), node->qualifiers[i].start + start);
 
-	debug_log_info("Indexers: %lu", node->indexer_count);
+	debug_log_info_verbose("Indexers: %lu", node->indexer_count);
 	for(u32 i = 0; i < node->indexer_count; i++)
-		debug_log_info("\t%.*s", U32_PAIR_DIFF(node->indexers[i]), node->indexers[i].start + start);
+		debug_log_info_verbose("\t%.*s", U32_PAIR_DIFF(node->indexers[i]), node->indexers[i].start + start);
 
 	if(node->has_value)
 	{
-		debug_log_info("Value: ");
+		debug_log_info_verbose("Value: ");
 		debug_node(node->value, start);
 	}
 
 	if(node->unparsed.start != node->unparsed.end)
-		debug_log_info("Unparsed: %.*s", U32_PAIR_DIFF(node->unparsed), node->unparsed.start + start);
+		debug_log_info_verbose("Unparsed: %.*s", U32_PAIR_DIFF(node->unparsed), node->unparsed.start + start);
 
-	debug_log_info("Childs: %u", node->child_count);
+	debug_log_info_verbose("Childs: %u", node->child_count);
 	for(u32 i = 0; i < node->child_count; i++)
 		debug_node(node->childs[i], start);
 }
