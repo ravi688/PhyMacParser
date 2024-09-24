@@ -13,5 +13,6 @@ int main(int argc, char** argv)
 	ppsr_v3d_generic_parse_result_t result = ppsr_v3d_generic_parse(NULL, buf_get_ptr(text), buf_get_element_count(text) - 1);
 	assert(result.result == PPSR_SUCCESS);
 	buf_free(text);
+	ppsr_v3d_generic_parse_result_destroy(NULL, result);
 	return 0;
 }
