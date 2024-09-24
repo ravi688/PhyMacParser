@@ -99,4 +99,8 @@ PPSR_API ppsr_v3d_generic_parse_result_t ppsr_v3d_generic_parse(com_allocation_c
 PPSR_API void ppsr_v3d_generic_parse_result_destroy(com_allocation_callbacks_t* callbacks, ppsr_v3d_generic_parse_result_t result);
 PPSR_API void debug_node(v3d_generic_node_t* node, const char* start);
 
+
+/* helper functions for the user code */
+PPSR_API v3d_generic_attribute_t* node_find_attribute(v3d_generic_node_t* node, const char* start, const char* attrName);
+
 END_CPP_COMPATIBLE
