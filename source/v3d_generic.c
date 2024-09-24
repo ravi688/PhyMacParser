@@ -3,6 +3,7 @@
 #include <phymac_parser/debug.h>
 #include <common/assert.h>
 #include <phymac_parser/string.h> // for custom string functions
+#include <common/string.h> /* for com_safe_strncmp() */
 #include <string.h>		// for memory and string functions
 
 // NOTE: earlier this used to be <BufferLib/buffer.h>, since linux is case-sensitive, we need to use <bufferlib/buffer.h> here.
@@ -341,4 +342,15 @@ PPSR_API void ppsr_v3d_generic_parse_result_destroy(com_allocation_callbacks_t* 
 		destroy_node(callbacks, result.root);
 	if(result.log_buffer != NULL)
 		com_call_deallocate(callbacks, result.log_buffer);
+}
+
+PPSR_API v3d_generic_attribute_t* node_find_attribute(v3d_generic_node_t* node, const char* start, const char* attrName)
+{
+	for(u32 i = 0; i < node->attribute_count; ++i)
+	{
+		u32_pair_t pair = node->attributes[i].name;
+		if(com_safe_strncmp(pair.start + start, attrName, U32_PAIR_DIFF(pair)) == 0)
+			return &node->attributes[i];
+	}
+	return NULL;
 }
