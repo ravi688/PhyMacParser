@@ -354,3 +354,25 @@ PPSR_API v3d_generic_attribute_t* node_find_attribute(v3d_generic_node_t* node, 
 	}
 	return NULL;
 }
+
+PPSR_API void node_foreach_attribute(v3d_generic_node_t* node, const char* start, bool (*predicate)(u32_pair_t, const char* start, void* user_data), bool (*visitor)(v3d_generic_attribute_t* attr, const char* start, void* user_data), void* user_data)
+{
+	for(u32 i = 0; i < node->attribute_count; ++i)
+	{
+		u32_pair_t pair = node->attributes[i].name;
+		if(predicate(pair, start, user_data))
+			if(!visitor(&node->attributes[i], start, user_data))
+				break;
+	}
+}
+
+PPSR_API void node_foreach_attribute_name(v3d_generic_node_t* node, const char* start, const char* attr_name, bool (*visitor)(v3d_generic_attribute_t* attr, const char* start, void* user_data), void* user_data)
+{
+	for(u32 i = 0; i < node->attribute_count; ++i)
+	{
+		u32_pair_t pair = node->attributes[i].name;
+		if(com_safe_strncmp(pair.start + start, attr_name, U32_PAIR_DIFF(pair)) == 0)
+			if(!visitor(&node->attributes[i], start, user_data))
+				break;
+	}
+}
