@@ -102,5 +102,23 @@ PPSR_API void debug_node(v3d_generic_node_t* node, const char* start);
 
 /* helper functions for the user code */
 PPSR_API v3d_generic_attribute_t* node_find_attribute(v3d_generic_node_t* node, const char* start, const char* attrName);
+/* description: invokes 'visitor' function for each attribute for which 'predicate' returns true
+ * params:
+ *	node: pointer to the node object on which the attributes will be searched
+ * 	start: pointer to the start of the main string (the original string which was used to parse)
+ * 	predicate: function pointer which will be invoked for every attribute, it would return either true or false, if true, then only 'visitor' will be called
+ *	visitor: function pointer which will be invoked each time an attribute with a matching name is found
+ * 	user_data: pointer to the user data which will be passed to the visitor callback and predicate callback as the last argument
+ * NOTE: if 'visitor' returns false then iteration stops and no subsequent calls to 'visitor' are made. */
+PPSR_API void node_foreach_attribute(v3d_generic_node_t* node, const char* start, bool (*predicate)(u32_pair_t, const char* start, void* user_data), bool (*visitor)(v3d_generic_attribute_t* attr, const char* start, void* user_data), void* user_data);
+/* description: invokes 'visitor' function for each attribute with name matching the supplied name 'attr_name' 
+ * params:
+ *	node: pointer to the node object on which the attributes will be searched
+ * 	start: pointer to the start of the main string (the original string which was used to parse)
+ * 	attr_name: c-string, name of the attribute to be searched and invoked the callback 'visitor'
+ * 	visitor: function pointer which will be invoked each time an attribute with a matching name is found
+ * 	user_data: pointer to the user data which will be passed to the visitor callback as the last argument
+ * NOTE: if 'visitor' returns false then iteration stops and no subsequent calls to 'visitor' are made. */
+PPSR_API void node_foreach_attribute_name(v3d_generic_node_t* node, const char* start, const char* attr_name, bool (*visitor)(v3d_generic_attribute_t* attr, const char* start, void* user_data), void* user_data);
 
 END_CPP_COMPATIBLE
