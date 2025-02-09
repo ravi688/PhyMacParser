@@ -1,0 +1,36 @@
+{
+    "project_name" : "PhyMacParser",
+    "canonical_name" : "ppsr",
+    "description" : "Parsing library for V3DGeneric markup language",
+    "dependencies" : [ "common", "diskmanager" ],
+    "release_defines": [ "-DPPSR_RELEASE" ],
+    "debug_defines": [ "-DPPSR_DEBUG" ],
+    "install_header_dirs" : [ "include/phymac_parser" ],
+    "include_dirs" : [ "include" ],
+    "targets" :
+    [
+        {
+            "name" : "ppsr_static",
+            "is_static_library" : true,
+            "description" : "Static Library for BufferLib",
+            "build_defines" : [ "-DPPSR_BUILD_STATIC_LIBRARY" ],
+            "use_defines" : [ "-DPPSR_USE_STATIC_LIBRARY" ]
+        },
+        {
+            "name" : "ppsr_shared",
+            "is_shared_library" : true,
+            "build_defines" : [ "-DPPSR_BUILD_SHARED_LIBRARY" ],
+            "use_defines" : [ "-DPPSR_USE_SHARED_LIBRARY" ]
+        },
+        {
+            "name" : "main",
+            "is_executable" : true,
+            "sources" : [ "source/main.c" ]
+        }
+    ],
+    "sources" :
+    [
+        "source/string.c",
+        "source/v3d_generic.c"
+    ]
+}
